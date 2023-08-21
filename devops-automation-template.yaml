@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: DevOps Automation Example
+
+Resources:
+  WebAppBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: my-devops-app-bucket
+
+  WebAppSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for the web application
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: '80'
+          ToPort: '80'
+          CidrIp: 0.0.0.0/0
+
+  WebAppInstance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: t2.micro
+      SecurityGroups:
+        - Ref: WebAppSecurityGroup
+      KeyName: my-key-pair
+      ImageId: ami-xxxxxxxxxxxxxxxxx
+      UserData:
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          echo "Hello, DevOps!"
+
+  LoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Subnets:
+        - subnet-xxxxxxxxxxxxxxxxx
+        - subnet-yyyyyyyyyyyyyyyyy
+
+Outputs:
+  WebAppURL:
+    Description: URL of the web application
+    Value: !Sub http://${LoadBalancer.DNSName}
